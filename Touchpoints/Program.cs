@@ -22,26 +22,31 @@ app.UseHttpsRedirection();
 
 app.MapGet("/api/touchpoints", async (ApplicationDbContext context) =>
 {
-var touchpoints = await context.Touchpoints.ToListAsync();
-if (touchpoints == null)
-{
-return Results.NotFound("No touchpoints found.");
-}
-return Results.Ok(touchpoints);
+  var touchpoints = await context.Touchpoints.ToListAsync();
+  if (!touchpoints.Any())
+  {
+    return Results.NotFound("No touchpoints found.");
+  }
+  return Results.Ok(touchpoints);
 })
 .WithName("GetTouchpoints");
 
 app.MapPost("/api/touchpoints", async (ApplicationDbContext context, Touchpoint touchpoint) =>
 {
-if (string.IsNullOrEmpty(touchpoint.Name))
-{
-return Results.BadRequest("Touchpoint name is required.");
-}
+  if (string.IsNullOrEmpty(touchpoint.Name))
+  {
+    return Results.BadRequest("Touchpoint name is required.");
+  }
 
-context.Touchpoints.Add(touchpoint);
-await context.SaveChangesAsync();
+  if (string.IsNullOrEmpty(touchpoint.Description))
+  {
+    return Results.BadRequest("Touchpoint description is required.");
+  }
 
-return Results.Ok(touchpoint);
+  context.Touchpoints.Add(touchpoint);
+  await context.SaveChangesAsync();
+
+  return Results.Ok(touchpoint);
 })
 .WithName("AddTouchpoint");
 
